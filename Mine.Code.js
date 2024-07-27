@@ -1210,6 +1210,11 @@ function MineButton(mine_value, mine_index) {
             clearTimeout(pressTimer);
         }
 
+        ontouchcancel = function(event) {
+            // Clear the long press timer if the touch is canceled
+            clearTimeout(pressTimer);
+        }
+
         ontouchmove = function(event) {
             // Clear the long press timer if the touch moves
             clearTimeout(pressTimer);
