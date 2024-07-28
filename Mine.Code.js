@@ -308,7 +308,7 @@ function GameOver(result)
 			oImgFace.src = "images/win.gif";
 
 			alert("Awesome! You have cleared " + mine_count + " mines in only " + oRightBox.innerText + " seconds!");
-			result = nickname + " has cleared " + mine_count + " mines in only " + oRightBox.innerText + " seconds! Go to next!"	
+			result = nickname + " ha ripulito " + mine_count + " mine in solo " + oRightBox.innerText + " secondi! Go to next level!"	
 			row_count = row_count * 2;
 			col_count = col_count * 2;
 			if (row_count > 30) {
