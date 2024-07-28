@@ -390,6 +390,15 @@
 	font-weight: bold;
 }
 
+.advice {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 2vh; /*Assicura che il contenitore copra tutta l'altezza della pagina */
+	margin: 0; /* Rimuove i margini predefiniti del body */
+	padding: 0; /* Rimuove i padding predefiniti del body */
+}
+
 .page__container {
 	display: flex;
 	justify-content: center;
