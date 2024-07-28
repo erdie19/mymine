@@ -178,7 +178,7 @@
       document.getElementById('login').style.display = 'none';
       document.getElementById('loading').style.display = 'block';
       document.getElementById('loadingph').style.display = 'block';
-      document.getElementById('loader').style.marginTop = '50%';
+      document.getElementById('loader').style.marginTop = '20%';
 
       if (nickname || (!nickname && !lobbyCode)) {
         ws.send(JSON.stringify({ type: 'join', nickname: nickname, lobbyCode: lobbyCode }));
