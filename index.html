@@ -180,7 +180,7 @@
       document.getElementById('loadingph').style.display = 'block';
       document.getElementById('loader').style.marginTop = '50%';
 
-      if (nickname) {
+      if (nickname || (!nickname && !lobbyCode)) {
         ws.send(JSON.stringify({ type: 'join', nickname: nickname, lobbyCode: lobbyCode }));
       } else {
         console.log('Please enter both nickname and lobby code');
