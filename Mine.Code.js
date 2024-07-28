@@ -910,7 +910,7 @@ function MineButton(mine_value,mine_index)
 }
 
 
-//ORIGINALE FunctionBar
+
 function FunctionBar(mine_num)
 {
 	var oFunctionBar = document.createElement("div");
@@ -940,7 +940,6 @@ function FunctionBar(mine_num)
 
 	return oFunctionBar;
 }
-
 
 function MineArea(row,col,mine_num)
 {
