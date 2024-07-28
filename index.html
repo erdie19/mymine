@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MineSweeper Fight</title>
+  <title>MineSweeper VS</title>
   <link rel="stylesheet" href="Mine.Style.css" type="text/css" media="all"  />
   <script language="JavaScript" type="text/javascript" src="Mine.Code.js"></script>
   <style>
@@ -153,6 +153,7 @@
         document.getElementById('loading').style.display = 'none';
         document.getElementById('loadingph').style.display = 'none';
         document.getElementById('loader').style.height = '1vh';
+        document.getElementById('loader').style.marginTop = '1%';
         // Avvia il gioco
         startGame(8,8,10);
       } else if (message.type === 'joined') {
