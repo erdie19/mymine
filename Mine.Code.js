@@ -1,405 +1,252 @@
-// Constants
 const K_TRUE = "true";
 const K_FALSE = "false";
 
-var row_count, col_count, mine_count, rest_mine, is_end, is_begin, timer_id, time_count;
-var oMainFrame, oLeftBox, oRightBox, oImgFace;
+let oImgFace; // smile face
+let oLeftBox; // box that displays the remaining mine count
+let oRightBox; // box that displays the elapsed time
+let row_count, col_count, mine_count, time_count = 0; // elapsed time
+let rest_mine; // remaining mines
+let timer_id;
+let is_begin = false; // is the game started?
+let is_end = false; // is the game ended?
+let is_first_click = false; // is the first block opened
+let oMainFrame; // game main frame
+let nickname;
 
-//Expand all the mines when game is over
+function InitMineArea(row, col, mine_num, mine_index) {
+    const accumulate = row * col;
+    const mine_array = new Array(accumulate).fill(0);
+    const mine_pos = [...Array(accumulate).keys()];
+    let i, j, index, k, l, temp;
+
+    for (i = 0; i < (2 * accumulate); i++) {
+        k = Math.floor(Math.random() * accumulate);
+        l = Math.floor(Math.random() * accumulate);
+        [mine_pos[k], mine_pos[l]] = [mine_pos[l], mine_pos[k]];
+    }
+
+    if (mine_index) {
+        for (i = 0; i < mine_num; i++) {
+            if (mine_pos[i] === mine_index) {
+                [mine_pos[i], mine_pos[accumulate]] = [mine_pos[accumulate], mine_pos[i]];
+                break;
+            }
+        }
+    }
+
+    for (i = 0; i < mine_num; i++) {
+        mine_array[mine_pos[i]] = 9;
+    }
+
+    for (i = 0; i < row; i++) {
+        for (j = 0; j < col; j++) {
+            index = col * i + j;
+            if (mine_array[index] === 9) {
+                updateAdjacentCells(mine_array, index, i, j, row, col);
+            }
+        }
+    }
+
+    return mine_array;
+}
+
+function updateAdjacentCells(mine_array, index, i, j, row, col) {
+    const directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1], [0, 1],
+        [1, -1], [1, 0], [1, 1]
+    ];
+
+    directions.forEach(([di, dj]) => {
+        const ni = i + di, nj = j + dj;
+        if (ni >= 0 && ni < row && nj >= 0 && nj < col) {
+            const neighborIndex = col * ni + nj;
+            if (mine_array[neighborIndex] !== 9) mine_array[neighborIndex]++;
+        }
+    });
+}
+
+function RefreshMainFrame() {
+    is_begin = false;
+    is_end = false;
+    time_count = 0;
+    rest_mine = mine_count;
+    is_first_click = false;
+    clearInterval(timer_id);
+    const oldFrame = oMainFrame;
+    oMainFrame = new MainFrame(row_count, col_count, mine_count);
+    document.getElementById("playground").replaceChild(oMainFrame, oldFrame);
+}
+
+function FaceButton() {
+    const oButtonContainer = document.createElement("div");
+    const oButtonSelf = document.createElement("div");
+
+    oButtonContainer.className = "container_border";
+    oButtonContainer.style.width = "30px";
+    oButtonSelf.className = "img_button_up";
+    oButtonSelf.style.width = "24px";
+    oButtonSelf.style.height = "24px";
+    oButtonSelf.setAttribute("pushed", K_FALSE);
+
+    oImgFace = document.createElement("img");
+    oImgFace.border = 0;
+    oImgFace.src = "images/smile.gif";
+    oImgFace.style.padding = "0px";
+    oImgFace.style.margin = "2px 0 0 0px";
+
+    oButtonSelf.onmousedown = function () {
+        oButtonSelf.className = "img_button_down";
+        oButtonSelf.setAttribute("pushed", K_TRUE);
+    };
+
+    oButtonSelf.onmouseout = function () {
+        if (oButtonSelf.getAttribute("pushed") === K_TRUE) {
+            oButtonSelf.className = "img_button_up";
+            oButtonSelf.setAttribute("pushed", K_FALSE);
+        }
+    };
+
+    oButtonSelf.onmouseup = function () {
+        if (oButtonSelf.getAttribute("pushed") === K_FALSE) return false;
+        oButtonSelf.className = "img_button_up";
+        oButtonSelf.setAttribute("pushed", K_FALSE);
+        RefreshMainFrame();
+    };
+
+    oButtonSelf.appendChild(oImgFace);
+    oButtonContainer.appendChild(oButtonSelf);
+
+    return oButtonContainer;
+}
+
 function ExpandAll() {
-	for (var i = 0; i < row_count; i++) {
-		for (var j = 0; j < col_count; j++) {
-			var oMine = document.getElementById("mine_" + (i * col_count + j));
-			switch (parseInt(oMine.getAttribute("mine_value"), 10)) {
-				case 9:
-					if (oMine.getAttribute("marked") !== K_TRUE) {
-						oMine.className = "mine_down";
-						var oBomb = document.createElement("img");
-						oBomb.style.width = "15px";
-						oBomb.style.height = "15px";
-						oBomb.style.padding = "0px";
-						oBomb.style.margin = "0px";
-						oBomb.src = "images/bomb.gif";
-						oMine.appendChild(oBomb);
-					}
-					break;
-				default:
-					if (oMine.getAttribute("marked") === K_TRUE) {
-						oMine.className = "mine_wrong_flag";
-						var oError = document.createElement("img");
-						oError.style.width = "15px";
-						oError.style.height = "15px";
-						oError.style.padding = "0px";
-						oError.style.margin = "0px";
-						oError.src = "images/error.gif";
-						oMine.appendChild(oError);
-					} else {
-						oMine.className = "mine_down";
-						oMine.innerText = oMine.getAttribute("mine_value");
-					}
-					oMine.setAttribute("expanded", true);
-					break;
-			}
-		}
-	}
+    const accumulate = row_count * col_count;
+    for (let i = 0; i < accumulate; i++) {
+        const oMine = document.getElementById(`mine_${i}`);
+        if (oMine.getAttribute("expanded") === K_FALSE) {
+            expandMine(oMine);
+        }
+    }
 }
 
-//Check if the player win the game
-function CheckGameStatus() {
-	var is_win = true;
-	var accumulate = row_count * col_count;
-	if (rest_mine != 0) {
-		is_win = false;
-	} else {
-		for (var i = 0; i < accumulate; i++) {
-			var oMine = document.getElementById("mine_" + i);
-			if (oMine.getAttribute("expanded") === K_FALSE && oMine.getAttribute("mine_value") != 9) {
-				is_win = false;
-				break;
-			}
-		}
-	}
-
-	if (is_win) {
-		window.clearInterval(timer_id);
-		oImgFace.src = "images/smile_win.gif";
-		is_end = true;
-	}
+function expandMine(oMine) {
+    const mine_value = parseInt(oMine.getAttribute("mine_value"), 10);
+    switch (mine_value) {
+        case 9:
+            if (oMine.getAttribute("marked") === K_TRUE) {
+                oMine.className = "mine_down_bomb";
+            } else {
+                if (oMine.hasChildNodes()) oMine.removeChild(oMine.firstChild);
+                oMine.className = "mine_down_bomb";
+                const oBomb = document.createElement("img");
+                oBomb.style.width = "15px";
+                oBomb.style.height = "15px";
+                oBomb.src = "images/bomb.gif";
+                oMine.appendChild(oBomb);
+                oMine.setAttribute("expanded", K_TRUE);
+            }
+            break;
+    }
+    if (oMine.getAttribute("marked") === K_TRUE && mine_value !== 9) {
+        if (oMine.hasChildNodes()) oMine.removeChild(oMine.firstChild);
+        oMine.className = "mine_down_bomb";
+        const oError = document.createElement("img");
+        oError.style.width = "15px";
+        oError.style.height = "15px";
+        oError.src = "images/error.gif";
+        oMine.appendChild(oError);
+        oMine.setAttribute("expanded", K_TRUE);
+    }
 }
 
-//Expand the area where there is no mine
-function ExpandMineArea(mine_index) {
-	var i, j, cur_row, cur_col;
-	var temp_array, cur_array = new Array();
-	cur_array.push(mine_index);
-	while (cur_array.length > 0) {
-		temp_array = new Array();
-		for (i = 0; i < cur_array.length; i++) {
-			var oMine = document.getElementById("mine_" + cur_array[i]);
-			//if it is expanded already, then don't expand again
-			if (oMine.getAttribute("expanded") === K_TRUE) {
-				continue;
-			}
-
-			oMine.setAttribute("expanded", true);
-			oMine.className = "mine_down";
-			oMine.innerText = oMine.getAttribute("mine_value");
-			//when the mine's value is "0", expand the relative mine area
-			if (oMine.getAttribute("mine_value") == 0) {
-				cur_row = Math.floor(cur_array[i] / col_count);
-				cur_col = cur_array[i] % col_count;
-
-				//(i-1,j-1) (i-1,j) (i-1,j+1)
-				//(i,j-1)   (i,j)	(i,j+1)
-				//(i+1,j-1) (i+1,j) (i+1,j+1)	
-
-				//the row (i-1)
-				if ((cur_row - 1) >= 0) {
-					//(i-1,j-1)
-					if ((cur_col - 1) >= 0) {
-						j = col_count * (cur_row - 1) + cur_col - 1;
-						if (document.getElementById("mine_" + j).getAttribute("expanded") === K_FALSE) {
-							temp_array.push(j);
-						}
-					}
-					//(i-1,j)
-					j = col_count * (cur_row - 1) + cur_col;
-					if (document.getElementById("mine_" + j).getAttribute("expanded") === K_FALSE) {
-						temp_array.push(j);
-					}
-					//(i-1,j+1)
-					if ((cur_col + 1) < col_count) {
-						j = col_count * (cur_row - 1) + cur_col + 1;
-						if (document.getElementById("mine_" + j).getAttribute("expanded") === K_FALSE) {
-							temp_array.push(j);
-						}
-					}
-				}
-
-				//the row (i)
-				//(i,j-1)
-				if ((cur_col - 1) >= 0) {
-					j = col_count * cur_row + cur_col - 1;
-					if (document.getElementById("mine_" + j).getAttribute("expanded") === K_FALSE) {
-						temp_array.push(j);
-					}
-				}
-				//(i,j+1)
-				if ((cur_col + 1) < col_count) {
-					j = col_count * cur_row + cur_col + 1;
-					if (document.getElementById("mine_" + j).getAttribute("expanded") === K_FALSE) {
-						temp_array.push(j);
-					}
-				}
-
-				//the row (i+1)
-				if ((cur_row + 1) < row_count) {
-					//(i+1,j-1)
-					if ((cur_col - 1) >= 0) {
-						j = col_count * (cur_row + 1) + cur_col - 1;
-						if (document.getElementById("mine_" + j).getAttribute("expanded") === K_FALSE) {
-							temp_array.push(j);
-						}
-					}
-					//(i+1,j)
-					j = col_count * (cur_row + 1) + cur_col;
-					if (document.getElementById("mine_" + j).getAttribute("expanded") === K_FALSE) {
-						temp_array.push(j);
-					}
-					//(i+1,j+1)
-					if ((cur_col + 1) < col_count) {
-						j = col_count * (cur_row + 1) + cur_col + 1;
-						if (document.getElementById("mine_" + j).getAttribute("expanded") === K_FALSE) {
-							temp_array.push(j);
-						}
-					}
-				}
-			}
-		}
-		cur_array = temp_array;
-	}
+function GameOver(result) {
+    switch (result) {
+        case 0: // success
+            oImgFace.src = "images/win.gif";
+            alert(`Awesome! You have cleared ${mine_count} mines in only ${oRightBox.innerText} seconds!`);
+            let resultMessage = `${nickname} has cleared ${mine_count} mines in only ${oRightBox.innerText} seconds! Go to next!`;
+            updateGameParameters(resultMessage);
+            break;
+        case 1: // failure
+            ExpandAll();
+            oImgFace.src = "images/blast.gif";
+            alert("You lose, please try again!");
+            resultMessage = `${nickname} ha perso. Ripete il livello con ${mine_count} mine.`;
+            updateGameParameters(resultMessage);
+            break;
+        case 2: // timeout
+            alert("Come on! What takes you so long to finish? Please retry!");
+            oImgFace.src = "images/blast.gif";
+            clearInterval(timer_id);
+            break;
+    }
+    is_begin = false; // get ready to restart
+    is_end = true; // it's over
 }
 
-//create main frame
-function MainFrame(row, col, mine_num) {
-	var i, j, index;
-	var cur_mine;
-	var oFragment = document.createDocumentFragment();
-	row_count = row;
-	col_count = col;
-	mine_count = mine_num;
-	rest_mine = mine_num;
-
-	//create mine area value, save to array
-	var mine_array = InitMineArea(row, col, mine_num);
-	//create a new table
-	var oMineTable = document.createElement("table");
-	oMineTable.cellPadding = 0;
-	oMineTable.cellSpacing = 0;
-	oMineTable.id = "oMineTable";
-	//create thead
-	var oTBody = document.createElement("tbody");
-
-	//create a div contains the mine table
-	var oContainer = document.createElement("div");
-	oContainer.className = "container_border";
-
-	for (i = 0; i < row; i++) {
-		var oRow = document.createElement("tr");
-		for (j = 0; j < col; j++) {
-			index = col * i + j;
-			cur_mine = MineButton(mine_array[index], index);
-			var oCell = document.createElement("td");
-			oCell.appendChild(cur_mine);
-			oRow.appendChild(oCell);
-		}
-		oTBody.appendChild(oRow);
-	}
-
-	oMineTable.appendChild(oTBody);
-	oContainer.appendChild(oMineTable);
-	oFragment.appendChild(oContainer);
-	return oFragment;
+function updateGameParameters(resultMessage) {
+    clearInterval(timer_id);
+    ws.send(JSON.stringify({ type: 'update', message: resultMessage }));
+    row_count = Math.min(row_count * 2, 25);
+    col_count = Math.min(col_count * 2, 25);
+    mine_count += 30;
+    oButtonSelf.setAttribute("pushed", K_FALSE);
+    RefreshMainFrame();
 }
 
-//create mine button
-function MineButton(value, index) {
-	var oMine = document.createElement("div");
-	oMine.id = "mine_" + index;
-	oMine.className = "mine_up";
-	oMine.setAttribute("mine_value", value);
-	oMine.setAttribute("mine_index", index);
-	oMine.setAttribute("expanded", false);
-	oMine.setAttribute("detected", false);
-	oMine.setAttribute("marked", false);
-	oMine.setAttribute("pushed", false);
+function ExpandMineArea(source) {
+    const j = source % col_count;
+    const i = Math.floor(source / col_count);
+    const oMine = document.getElementById(`mine_${source}`);
 
-	oMine.onmousedown = function (event) {
-		handleMouseEvent(event);
-	};
-	oMine.onmouseup = function (event) {
-		handleMouseUp(event);
-	};
+    if (oMine.getAttribute("marked") === K_TRUE || oMine.getAttribute("expanded") === K_TRUE || oMine.getAttribute("detected") === K_TRUE) {
+        return;
+    }
 
-	// Added for touch support
-	oMine.ontouchstart = function (event) {
-		event.preventDefault(); // Prevent default touch behavior
-		this.touchStartTime = new Date().getTime(); // Record the time when the touch starts
-		this.touchMoved = false; // Track if the touch has moved
-		this.addEventListener('touchmove', function () {
-			this.touchMoved = true; // Set flag if the touch has moved
-		});
-	};
-
-	oMine.ontouchend = function (event) {
-		event.preventDefault(); // Prevent default touch behavior
-		var touchEndTime = new Date().getTime(); // Record the time when the touch ends
-		var touchDuration = touchEndTime - this.touchStartTime; // Calculate the touch duration
-
-		if (this.touchMoved) { // If touch has moved, ignore it
-			this.touchMoved = false;
-			return;
-		}
-
-		if (touchDuration < 500) { // If touch duration is less than 500ms, treat it as a left click
-			handleLeftClick(this);
-		} else { // Otherwise, treat it as a right click
-			handleRightClick(this);
-		}
-	};
-
-	return oMine;
+    const temp_value = parseInt(oMine.getAttribute("mine_value"), 10);
+    switch (temp_value) {
+        case 0:
+            oMine.className = "mine_down";
+            oMine.setAttribute("expanded", K_TRUE);
+            expandAdjacentCells(i, j);
+            break;
+        case 1: oMine.className = "mine_down_1"; oMine.innerText = "1"; oMine.setAttribute("expanded", K_TRUE); break;
+        case 2: oMine.className = "mine_down_2"; oMine.innerText = "2"; oMine.setAttribute("expanded", K_TRUE); break;
+        case 3: oMine.className = "mine_down_3"; oMine.innerText = "3"; oMine.setAttribute("expanded", K_TRUE); break;
+        case 4: oMine.className = "mine_down_4"; oMine.innerText = "4"; oMine.setAttribute("expanded", K_TRUE); break;
+        case 5: oMine.className = "mine_down_5"; oMine.innerText = "5"; oMine.setAttribute("expanded", K_TRUE); break;
+        case 6: oMine.className = "mine_down_6"; oMine.innerText = "6"; oMine.setAttribute("expanded", K_TRUE); break;
+        case 7: oMine.className = "mine_down_7"; oMine.innerText = "7"; oMine.setAttribute("expanded", K_TRUE); break;
+        case 8: oMine.className = "mine_down_8"; oMine.innerText = "8"; oMine.setAttribute("expanded", K_TRUE); break;
+        default:
+            oMine.className = "mine_down_bomb";
+            const oBomb = document.createElement("img");
+            oBomb.style.width = "15px";
+            oBomb.style.height = "15px";
+            oBomb.src = "images/bomb.gif";
+            oMine.appendChild(oBomb);
+            oMine.setAttribute("expanded", K_TRUE);
+            GameOver(1);
+            return;
+    }
 }
 
-// Handle mouse events
-function handleMouseEvent(event) {
-	var oMine = event.target;
-	if (event.button === 0) {
-		oMine.className = "mine_down";
-		oMine.setAttribute("pushed", true);
-	}
-}
+function expandAdjacentCells(i, j) {
+    const directions = [
+        [-1, -1], [-1, 0], [-1, 1],
+        [0, -1], [0, 1],
+        [1, -1], [1, 0], [1, 1]
+    ];
 
-// Handle left click
-function handleLeftClick(oMine) {
-	oMine.setAttribute("pushed", false);
-	//if this block is marked as a mine, then disable
-	if (oMine.getAttribute("marked") === K_TRUE) {
-		return false;
-	}
-
-	if (is_end) {
-		return false;
-	}
-
-	if (oMine.getAttribute("expanded") === K_TRUE) {
-		return false;
-	}
-	oMine.setAttribute("expanded", true);
-
-	//if this block is a mine
-	if (parseInt(oMine.getAttribute("mine_value"), 10) === 9) {
-		//face image is failure
-		oImgFace.src = "images/smile_fail.gif";
-		//show the mine
-		var oBomb = document.createElement("img");
-		oBomb.style.width = "15px";
-		oBomb.style.height = "15px";
-		oBomb.style.padding = "0px";
-		oBomb.style.margin = "0px";
-		oBomb.src = "images/bomb.gif";
-		oMine.appendChild(oBomb);
-		//end of game
-		is_end = true;
-		//expand the main frame
-		window.clearInterval(timer_id);
-		ExpandAll();
-	} else {
-		oMine.className = "mine_down";
-		//expand the safe area if this block is "0"
-		if (oMine.getAttribute("mine_value") === "0") {
-			ExpandMineArea(parseInt(oMine.getAttribute("mine_index"), 10));
-		} else {
-			oMine.innerText = oMine.getAttribute("mine_value");
-		}
-	}
-
-	if (!is_begin) {
-		is_begin = true;
-		timer_id = window.setInterval(function () {
-			time_count++;
-			oRightBox.innerText = time_count;
-		}, 1000);
-	}
-
-	CheckGameStatus();
-}
-
-// Handle right click
-function handleRightClick(oMine) {
-	if (is_end) {
-		return false;
-	}
-
-	if (oMine.getAttribute("expanded") === K_TRUE) {
-		return false;
-	}
-
-	if (oMine.getAttribute("detected") === K_TRUE) {
-		//cancel the guess flag
-		oMine.className = "mine_up";
-		oMine.setAttribute("detected", false);
-		return false;
-	}
-
-	if (oMine.getAttribute("marked") === K_FALSE) {
-		var oFlag = document.createElement("img");
-		oFlag.style.width = "15px";
-		oFlag.style.height = "15px";
-		oFlag.style.padding = "0px";
-		oFlag.style.margin = "0px";
-		oFlag.src = "images/flag.gif";
-		oMine.appendChild(oFlag);
-		oMine.setAttribute("marked", true);
-		rest_mine--;
-		oLeftBox.innerText = rest_mine;
-	} else {
-		oMine.removeChild(oMine.firstChild);
-		oMine.setAttribute("marked", false);
-		rest_mine++;
-		oLeftBox.innerText = rest_mine;
-	}
-
-	if (!is_begin) {
-		is_begin = true;
-		timer_id = window.setInterval(function () {
-			time_count++;
-			oRightBox.innerText = time_count;
-		}, 1000);
-	}
-
-	CheckGameStatus();
-}
-
-//Init the game
-function Init() {
-	oMainFrame = new MainFrame(row_count, col_count, mine_count);
-	document.getElementById("playground").appendChild(oMainFrame);
-
-	oLeftBox = document.getElementById("mine_count");
-	oLeftBox.innerText = mine_count;
-	oRightBox = document.getElementById("time_count");
-	oRightBox.innerText = 0;
-
-	var oFaceContainer = document.getElementById("face_button");
-	oFaceContainer.appendChild(FaceButton());
-}
-
-//Process player's config
-function StartGame() {
-	var obj = document.getElementById("difficulty");
-	var value = obj.value;
-	switch (value) {
-		case "beginner":
-			row_count = 9;
-			col_count = 9;
-			mine_count = 10;
-			break;
-		case "intermediate":
-			row_count = 16;
-			col_count = 16;
-			mine_count = 40;
-			break;
-		case "advanced":
-			row_count = 16;
-			col_count = 30;
-			mine_count = 99;
-			break;
-	}
-
-	RefreshMainFrame();
-}
-
-window.onload = function () {
-	document.getElementById("start_button").onclick = StartGame;
+    directions.forEach(([di, dj]) => {
+        const ni = i + di, nj = j + dj;
+        if (ni >= 0 && ni < row_count && nj >= 0 && nj < col_count) {
+            const index = col_count * ni + nj;
+            const oMine = document.getElementById(`mine_${index}`);
+            if (oMine && oMine.getAttribute("expanded") === K_FALSE) {
+                ExpandMineArea(index);
+            }
+        }
+    });
 }
