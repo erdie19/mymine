@@ -298,6 +298,8 @@ function ExpandAll()
 	}
 }
 
+
+
 //Game over
 function GameOver(result)
 {
@@ -306,9 +308,10 @@ function GameOver(result)
 		//success
 		case 0:
 			oImgFace.src = "images/win.gif";
-
+            var audio = new Audio('win.wav');
+            audio.play();
 			alert("Awesome! You have cleared " + mine_count + " mines in only " + oRightBox.innerText + " seconds!");
-			result = nickname + " ha ripulito " + mine_count + " mine in solo " + oRightBox.innerText + " secondi! Go to next level!"	
+			result = nickname + " ha ripulito " + mine_count + " mine in solo " + oRightBox.innerText + " secondi! Go to the next level!"	
 			row_count = row_count * 2;
 			col_count = col_count * 2;
 			if (row_count > 30) {
