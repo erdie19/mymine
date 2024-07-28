@@ -550,6 +550,11 @@ function handleTouchStart(event) {
 		onLongPress(event.target);
 	}, longPressDuration);
 }
+function handleTouchStartFlag(event) {
+	longPressTimer = setTimeout(function() {
+		onLongPress(event.target);
+	}, 1);
+}
 
 function handleTouchEnd(event) {
 	clearTimeout(longPressTimer);
@@ -633,9 +638,10 @@ function MineButton(mine_value,mine_index)
 	//set whether the guess flag is set
 	oMine.setAttribute("detected", false);
 
-	oMine.addEventListener('touchstart', handleTouchStart, false);
-    oMine.addEventListener('touchend', handleTouchEnd, false);
-    oMine.addEventListener('touchcancel', handleTouchCancel, false);
+	//comandi touch
+	// oMine.addEventListener('touchstart', handleTouchStart, false);
+    // oMine.addEventListener('touchend', handleTouchEnd, false);
+    // oMine.addEventListener('touchcancel', handleTouchCancel, false);
 
 	//oMine.innerText = mine_value;
 
@@ -968,15 +974,39 @@ function MineButton(mine_value,mine_index)
 						oLeftBox.innerText = rest_mine.toString();
 
 						CheckGameStatus();
-					} else {
+					} 
+					else {
+						//set guess flag
 						rest_mine++;
 						oLeftBox.innerText = rest_mine.toString();
+						//clear the mark
 						this.removeChild(this.firstChild);
 						this.setAttribute("marked", false);
-						this.setAttribute("detected", false);
-						this.className = "mine_up";
-						this.innerText = ""; 
+						
+						if(detected === K_FALSE)
+						{	
+							this.setAttribute("detected", true);
+							this.innerText = "?";
+							this.className = "mine_up";
+						}
+						else
+						{
+							this.setAttribute("detected", false);
+						} 
 					}
+				}
+				else {
+					// var imsrc = this.getAttribute("src");
+					// if(imsrc === "images/flag.gif"){
+					// 	rest_mine++;
+					// 	oLeftBox.innerText = rest_mine.toString();
+					// 	this.removeChild(this.firstChild);
+					// 	this.setAttribute("marked", false);
+					// 	this.setAttribute("detected", false);
+					// 	this.className = "mine_up";
+					// 	this.innerText = ""; 
+					// }
+					
 				}
 			}
 		}
