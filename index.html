@@ -120,8 +120,10 @@
             </div>
         </div>
         <div class="spoke"></div>
-    </div>
+  </div>
+  <div class="page__container" style="height: 2vh!;text-align:center!important;display: none;" id="loadingph"><p>In attesa di un degno avversario...</p></div>
 </div>
+
 
   <div id="game"></div>
   <div id="playground"></div>
@@ -148,6 +150,7 @@
       if (message.type === 'start') {
         console.log('Lobby is full. Starting the game...');
         document.getElementById('loading').style.display = 'none';
+        document.getElementById('loadingph').style.display = 'none';
         document.getElementById('loader').style.height = '1vh';
         // Avvia il gioco
         startGame(8,8,10);
@@ -172,6 +175,7 @@
 
       document.getElementById('login').style.display = 'none';
       document.getElementById('loading').style.display = 'block';
+      document.getElementById('loadingph').style.display = 'block';
       document.getElementById('loader').style.height = '100%';
 
       if (nickname) {
