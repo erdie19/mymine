@@ -946,6 +946,7 @@ function MineButton(mine_value,mine_index)
 			}
 			else {
 				if (is_end) return;
+				var expanded = this.getAttribute("expanded");
 				if (this.getAttribute("marked") === K_TRUE) {
 					// Rimuove la bandierina dalla cella
 					this.removeChild(this.firstChild);  // Rimuove il primo (e unico) elemento figlio, che è l'immagine della bandierina
@@ -958,8 +959,7 @@ function MineButton(mine_value,mine_index)
 					oLeftBox.innerText = rest_mine.toString();  // Aggiorna il display del numero di miniere rimanenti
 					return false;  // Termina l'esecuzione della funzione
 				}
-				var expanded = this.getAttribute("expanded");
-				if (expanded === K_FALSE) {
+				else if (expanded === K_FALSE) {
 					var detected = this.getAttribute("detected");
 					var marked = this.getAttribute("marked");
 					this.className = "mine_up";
@@ -1003,19 +1003,6 @@ function MineButton(mine_value,mine_index)
 							this.setAttribute("detected", false);
 						} 
 					}
-				}
-				else {
-					// var imsrc = this.getAttribute("src");
-					// if(imsrc === "images/flag.gif"){
-					// 	rest_mine++;
-					// 	oLeftBox.innerText = rest_mine.toString();
-					// 	this.removeChild(this.firstChild);
-					// 	this.setAttribute("marked", false);
-					// 	this.setAttribute("detected", false);
-					// 	this.className = "mine_up";
-					// 	this.innerText = ""; 
-					// }
-					
 				}
 			}
 		}
