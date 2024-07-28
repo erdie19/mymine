@@ -494,6 +494,72 @@ function CheckGameStatus()
 	}
 }
 
+// Codice per gestire le pressioni prolungate sui dispositivi touch
+var longPressDuration = 500; // Durata della pressione prolungata in millisecondi
+var longPressTimer;
+
+function handleTouchStart(event) {
+	longPressTimer = setTimeout(function() {
+		onLongPress(event.target);
+	}, longPressDuration);
+}
+
+function handleTouchEnd(event) {
+	clearTimeout(longPressTimer);
+}
+
+function handleTouchCancel(event) {
+	clearTimeout(longPressTimer);
+}
+
+function onLongPress(target) {
+	// Qui va il codice per gestire la pressione prolungata
+	console.log("Long press detected on", target);
+	// Simulare il comportamento del click destro
+	if (is_end) return;
+
+	var expanded = target.getAttribute("expanded");
+	if (expanded === K_FALSE) {
+		var detected = target.getAttribute("detected");
+		var marked = target.getAttribute("marked");
+		target.className = "mine_up";
+		if (marked === K_FALSE) {
+			if (detected === K_TRUE) {
+				target.setAttribute("detected", false);
+				target.innerText = "";
+				return;
+			}
+
+			var oFlag = document.createElement("img");
+			oFlag.style.width = "15px";
+			oFlag.style.height = "15px";
+			oFlag.style.padding = "0px";
+			oFlag.style.margin = "0px";
+			oFlag.src = "images/flag.gif";
+			target.appendChild(oFlag);
+			target.setAttribute("marked", true);
+
+			rest_mine--;
+			oLeftBox.innerText = rest_mine.toString();
+
+			CheckGameStatus();
+		} else {
+			rest_mine++;
+			oLeftBox.innerText = rest_mine.toString();
+			target.removeChild(target.firstChild);
+			target.setAttribute("marked", false);
+
+			if (detected === K_FALSE) {
+				target.setAttribute("detected", true);
+				target.innerText = "?";
+				target.className = "mine_up";
+			} else {
+				target.setAttribute("detected", false);
+			}
+		}
+	}
+}
+
 //Mine object
 //VERSIONE ORIGINALE COMMENTATA
 function MineButton(mine_value,mine_index)
@@ -524,6 +590,10 @@ function MineButton(mine_value,mine_index)
 	
 	//set whether the guess flag is set
 	oMine.setAttribute("detected", false);
+
+	oMine.addEventListener('touchstart', handleTouchStart, false);
+    oMine.addEventListener('touchend', handleTouchEnd, false);
+    oMine.addEventListener('touchcancel', handleTouchCancel, false);
 
 	//oMine.innerText = mine_value;
 
