@@ -609,6 +609,16 @@ function MineButton(mine_value,mine_index)
 				{
 					return false;
 				}
+                if (marked === K_TRUE) {
+                    this.removeChild(this.firstChild);
+                    this.setAttribute("marked", false);
+                    this.setAttribute("detected", false);
+                    this.className = "mine_up";
+                    this.innerText = "";  // Rimuove qualsiasi testo presente
+                    rest_mine++;
+                    oLeftBox.innerText = rest_mine.toString();
+                    return false;
+                }
 				this.setAttribute("pushed", true);
 				this.className = "mine_down";
 			}
