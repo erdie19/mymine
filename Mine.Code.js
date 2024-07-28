@@ -604,11 +604,6 @@ function MineButton(mine_value,mine_index)
 			//left mouse button
 			if(event.button === 0)
 			{
-				//don't response to "expanded" and "marked" case
-				if(this.getAttribute("marked") === K_TRUE || this.getAttribute("expanded") === K_TRUE)
-				{
-					return false;
-				}
                 if (marked === K_TRUE) {
                     this.removeChild(this.firstChild);
                     this.setAttribute("marked", false);
@@ -619,6 +614,11 @@ function MineButton(mine_value,mine_index)
                     oLeftBox.innerText = rest_mine.toString();
                     return false;
                 }
+				//don't response to "expanded" and "marked" case
+				if(this.getAttribute("marked") === K_TRUE || this.getAttribute("expanded") === K_TRUE)
+				{
+					return false;
+				}
 				this.setAttribute("pushed", true);
 				this.className = "mine_down";
 			}
