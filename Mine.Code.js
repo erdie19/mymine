@@ -209,12 +209,9 @@ function ToggleButton() {
     return oButtonContainer;
 }
 
-// Utilizzo della funzione per creare e aggiungere il pulsante toggle al documento
 
 
-
-// Utilizzo della funzione per creare e aggiungere il pulsante toggle al documento
-document.body.appendChild(ToggleButton());
+// document.body.appendChild(ToggleButton());
 
 
 
@@ -949,6 +946,18 @@ function MineButton(mine_value,mine_index)
 			}
 			else {
 				if (is_end) return;
+				if (this.getAttribute("marked") === K_TRUE) {
+					// Rimuove la bandierina dalla cella
+					this.removeChild(this.firstChild);  // Rimuove il primo (e unico) elemento figlio, che è l'immagine della bandierina
+					// Aggiorna gli attributi della cella
+					this.setAttribute("marked", false);
+					this.setAttribute("detected", false);
+					this.className = "mine_up";  // Ripristina la classe della cella
+					this.innerText = "";  // Rimuove qualsiasi testo presente
+					rest_mine++;  // Incrementa il numero di miniere rimanenti
+					oLeftBox.innerText = rest_mine.toString();  // Aggiorna il display del numero di miniere rimanenti
+					return false;  // Termina l'esecuzione della funzione
+				}
 				var expanded = this.getAttribute("expanded");
 				if (expanded === K_FALSE) {
 					var detected = this.getAttribute("detected");
