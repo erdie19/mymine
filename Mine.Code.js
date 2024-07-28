@@ -4,6 +4,7 @@ const K_FALSE = "false";
 var oImgFace;	//smile face
 var oLeftBox;	//box that display the rest count of mine
 var oRightBox;	//box that display the used time
+var toggleState = false;
 var row_count,col_count;
 var mine_count;
 var time_count = 0;	//time used
@@ -166,7 +167,53 @@ function RefreshMainFrame()
 	document.getElementById("playground").replaceChild(oMainFrame, oldFrame);
 }
 
+var toggleState = false;
 
+function ToggleButton() {
+    var oButtonContainer = document.createElement("div");
+    var oButtonSelf = document.createElement("div");
+    oButtonContainer.className = "container_border";
+    oButtonContainer.style.width = "30px";
+    oButtonSelf.className = "img_button_up";
+    oButtonSelf.style.width = "24px";
+    oButtonSelf.style.height = "24px";
+    
+    // Set initial state to false
+    oButtonSelf.setAttribute("state", toggleState);
+
+    var oImgIcon = document.createElement("img");
+    oImgIcon.border = 0;
+    oImgIcon.src = "images/bomb.gif";
+    oImgIcon.style.padding = "0px";
+    oImgIcon.style.margin = "2px 0 0 0px";
+
+    with(oButtonSelf) {
+        onclick = function() {
+            // Toggle state
+            toggleState = !toggleState;
+            oButtonSelf.setAttribute("state", toggleState);
+
+            // Update icon based on the new state
+            if (toggleState) {
+                oImgIcon.src = "images/flag.gif";
+            } else {
+                oImgIcon.src = "images/bomb.gif";
+            }
+        }
+    }
+
+    oButtonSelf.appendChild(oImgIcon);
+    oButtonContainer.appendChild(oButtonSelf);
+
+    return oButtonContainer;
+}
+
+// Utilizzo della funzione per creare e aggiungere il pulsante toggle al documento
+
+
+
+// Utilizzo della funzione per creare e aggiungere il pulsante toggle al documento
+document.body.appendChild(ToggleButton());
 
 
 
@@ -224,8 +271,6 @@ function FaceButton()
 
 	return oButtonContainer;
 }
-
-
 
 
 //Expand the main frame after game over
@@ -297,8 +342,6 @@ function ExpandAll()
 		}
 	}
 }
-
-
 
 //Game over
 function GameOver(result)
@@ -790,53 +833,29 @@ function MineButton(mine_value,mine_index)
 		
 		onmouseup = function()
 		{
-			if(is_end)
-				return false;
-			
-			//is detecting on going?
-			if(this.getAttribute("detecting") === K_TRUE)
-			{
-				if(this.getAttribute("expanded") === K_FALSE && this.getAttribute("marked") === K_FALSE)
-				{
-					this.className = "mine_up";
-				}
-				this.setAttribute("detecting", false);
+			if (!toggleState) {
+
+				if(is_end)
+					return false;
 				
-				//if surrounding mark doesn't match the number, restore the visual style
-				var cur_index = parseInt(oMine.getAttribute("mine_index"), 10);
-				var cur_y = cur_index % col_count;
-				var cur_x = Math.round((cur_index - cur_y) / col_count);
-				var i, j;
-				var marked_count = 0;
-
-				if(oMine.getAttribute("expanded") === K_TRUE)
+				//is detecting on going?
+				if(this.getAttribute("detecting") === K_TRUE)
 				{
-					for(i = -1; i <= 1; i++)
+					if(this.getAttribute("expanded") === K_FALSE && this.getAttribute("marked") === K_FALSE)
 					{
-						temp_x = cur_x + i;
-						if(temp_x < 0 || temp_x > (row_count - 1))
-						{
-							continue;
-						}
-						for(j = -1; j <= 1; j++)
-						{
-							temp_y = cur_y + j;
-							if(temp_y > (col_count - 1) || temp_y < 0)
-							{
-								continue;
-							}
-							temp_index = temp_x * col_count + temp_y;
-							curMine = document.getElementById("mine_" + temp_index);
-							if(curMine != null && curMine.getAttribute("marked") === K_TRUE)
-							{
-								marked_count++;
-							}
-						}
+						this.className = "mine_up";
 					}
+					this.setAttribute("detecting", false);
+					
+					//if surrounding mark doesn't match the number, restore the visual style
+					var cur_index = parseInt(oMine.getAttribute("mine_index"), 10);
+					var cur_y = cur_index % col_count;
+					var cur_x = Math.round((cur_index - cur_y) / col_count);
+					var i, j;
+					var marked_count = 0;
 
-					if(marked_count == parseInt(oMine.getAttribute("mine_value"), 10))
+					if(oMine.getAttribute("expanded") === K_TRUE)
 					{
-						//expand the unexpanded blocks
 						for(i = -1; i <= 1; i++)
 						{
 							temp_x = cur_x + i;
@@ -853,46 +872,111 @@ function MineButton(mine_value,mine_index)
 								}
 								temp_index = temp_x * col_count + temp_y;
 								curMine = document.getElementById("mine_" + temp_index);
-								if(curMine != null && curMine.getAttribute("marked") === K_FALSE && curMine.getAttribute("expanded") === K_FALSE)
+								if(curMine != null && curMine.getAttribute("marked") === K_TRUE)
 								{
-									curMine.setAttribute("pushed", true);
-									curMine.expandCover();
+									marked_count++;
 								}
 							}
 						}
-						return false;
-					}
-				}
 
-				for(i = -1; i <= 1; i++)
-				{
-					temp_x = cur_x + i;
-					if(temp_x < 0 || temp_x > (row_count - 1))
-					{
-						continue;
+						if(marked_count == parseInt(oMine.getAttribute("mine_value"), 10))
+						{
+							//expand the unexpanded blocks
+							for(i = -1; i <= 1; i++)
+							{
+								temp_x = cur_x + i;
+								if(temp_x < 0 || temp_x > (row_count - 1))
+								{
+									continue;
+								}
+								for(j = -1; j <= 1; j++)
+								{
+									temp_y = cur_y + j;
+									if(temp_y > (col_count - 1) || temp_y < 0)
+									{
+										continue;
+									}
+									temp_index = temp_x * col_count + temp_y;
+									curMine = document.getElementById("mine_" + temp_index);
+									if(curMine != null && curMine.getAttribute("marked") === K_FALSE && curMine.getAttribute("expanded") === K_FALSE)
+									{
+										curMine.setAttribute("pushed", true);
+										curMine.expandCover();
+									}
+								}
+							}
+							return false;
+						}
 					}
-					for(j = -1; j <= 1; j++)
+
+					for(i = -1; i <= 1; i++)
 					{
-						temp_y = cur_y + j;
-						if(temp_y > (col_count -1) || temp_y < 0)
+						temp_x = cur_x + i;
+						if(temp_x < 0 || temp_x > (row_count - 1))
 						{
 							continue;
 						}
-						temp_index = temp_x * col_count + temp_y;
-						curMine = document.getElementById("mine_" + temp_index);
-						if(curMine != null && curMine.getAttribute("marked") === K_FALSE && curMine.getAttribute("expanded") === K_FALSE)
+						for(j = -1; j <= 1; j++)
 						{
-							curMine.className = "mine_up";
+							temp_y = cur_y + j;
+							if(temp_y > (col_count -1) || temp_y < 0)
+							{
+								continue;
+							}
+							temp_index = temp_x * col_count + temp_y;
+							curMine = document.getElementById("mine_" + temp_index);
+							if(curMine != null && curMine.getAttribute("marked") === K_FALSE && curMine.getAttribute("expanded") === K_FALSE)
+							{
+								curMine.className = "mine_up";
+							}
 						}
 					}
+					return false;
 				}
-				return false;
+				
+				// left button mouse
+				if(event.button === 0)
+				{
+					this.expandCover();
+				}
 			}
-			
-			// left button mouse
-			if(event.button === 0)
-			{
-				this.expandCover();
+			else {
+				if (is_end) return;
+				var expanded = this.getAttribute("expanded");
+				if (expanded === K_FALSE) {
+					var detected = this.getAttribute("detected");
+					var marked = this.getAttribute("marked");
+					this.className = "mine_up";
+					if (marked === K_FALSE) {
+						if (detected === K_TRUE) {
+							this.setAttribute("detected", false);
+							this.innerText = "";
+							return;
+						}
+
+						var oFlag = document.createElement("img");
+						oFlag.style.width = "15px";
+						oFlag.style.height = "15px";
+						oFlag.style.padding = "0px";
+						oFlag.style.margin = "0px";
+						oFlag.src = "images/flag.gif";
+						this.appendChild(oFlag);
+						this.setAttribute("marked", true);
+
+						rest_mine--;
+						oLeftBox.innerText = rest_mine.toString();
+
+						CheckGameStatus();
+					} else {
+						rest_mine++;
+						oLeftBox.innerText = rest_mine.toString();
+						this.removeChild(this.firstChild);
+						this.setAttribute("marked", false);
+						this.setAttribute("detected", false);
+						this.className = "mine_up";
+						this.innerText = ""; 
+					}
+				}
 			}
 		}
 		
@@ -989,7 +1073,6 @@ function MineButton(mine_value,mine_index)
 }
 
 
-
 function FunctionBar(mine_num)
 {
 	var oFunctionBar = document.createElement("div");
@@ -1011,6 +1094,9 @@ function FunctionBar(mine_num)
 
 	var oFaceButton = new FaceButton();
 	oMidBox.appendChild(oFaceButton);
+
+	var oToggleButton = new ToggleButton();
+	oMidBox.appendChild(oToggleButton);
 
 	oFunctionPanle.appendChild(oLeftBox);
 	oFunctionPanle.appendChild(oRightBox);
