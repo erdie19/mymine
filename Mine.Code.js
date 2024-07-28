@@ -545,17 +545,12 @@ function onLongPress(target) {
 			CheckGameStatus();
 		} else {
 			rest_mine++;
-			oLeftBox.innerText = rest_mine.toString();
-			target.removeChild(target.firstChild);
-			target.setAttribute("marked", false);
-
-			if (detected === K_FALSE) {
-				target.setAttribute("detected", true);
-				target.innerText = "?";
-				target.className = "mine_up";
-			} else {
-				target.setAttribute("detected", false);
-			}
+            oLeftBox.innerText = rest_mine.toString();
+            target.removeChild(target.firstChild);
+            target.setAttribute("marked", false);
+            target.setAttribute("detected", false);
+            target.className = "mine_up";
+            target.innerText = ""; 
 		}
 	}
 }
