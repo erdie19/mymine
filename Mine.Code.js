@@ -605,7 +605,7 @@ function MineButton(mine_value,mine_index)
 			if(event.button === 0)
 			{
 				//don't response to "expanded" and "marked" case
-                if (marked === K_TRUE) {
+                if (this.getAttribute("marked") === K_TRUE) {
                     this.removeChild(this.firstChild);
                     this.setAttribute("marked", false);
                     this.setAttribute("detected", false);
@@ -615,7 +615,7 @@ function MineButton(mine_value,mine_index)
                     oLeftBox.innerText = rest_mine.toString();
                     return false;
                 }
-                
+
 				if(this.getAttribute("marked") === K_TRUE || this.getAttribute("expanded") === K_TRUE)
 				{
 					return false;
