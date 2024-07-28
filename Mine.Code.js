@@ -174,6 +174,7 @@ function ToggleButton() {
     var oButtonSelf = document.createElement("div");
     oButtonContainer.className = "container_border";
     oButtonContainer.style.width = "30px";
+	oButtonContainer.style.marginTop = "10px";
     oButtonSelf.className = "img_button_up";
     oButtonSelf.style.width = "24px";
     oButtonSelf.style.height = "24px";
