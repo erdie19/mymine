@@ -544,24 +544,14 @@ function onLongPress(target) {
 
 			CheckGameStatus();
 		} else {
-            //set guess flag
-            rest_mine++;
+			rest_mine++;
             oLeftBox.innerText = rest_mine.toString();
-            //clear the mark
-            this.removeChild(this.firstChild);
-            this.setAttribute("marked", false);
-            
-            if(detected === K_FALSE)
-            {	
-                this.setAttribute("detected", true);
-                this.innerText = "?";
-                this.className = "mine_up";
-            }
-            else
-            {
-                this.setAttribute("detected", false);
-            }
-        }
+            target.removeChild(target.firstChild);
+            target.setAttribute("marked", false);
+            target.setAttribute("detected", false);
+            target.className = "mine_up";
+            target.innerText = ""; 
+		}
 	}
 }
 
@@ -615,6 +605,17 @@ function MineButton(mine_value,mine_index)
 			if(event.button === 0)
 			{
 				//don't response to "expanded" and "marked" case
+                if (marked === K_TRUE) {
+                    this.removeChild(this.firstChild);
+                    this.setAttribute("marked", false);
+                    this.setAttribute("detected", false);
+                    this.className = "mine_up";
+                    this.innerText = "";  // Rimuove qualsiasi testo presente
+                    rest_mine++;
+                    oLeftBox.innerText = rest_mine.toString();
+                    return false;
+                }
+                
 				if(this.getAttribute("marked") === K_TRUE || this.getAttribute("expanded") === K_TRUE)
 				{
 					return false;
