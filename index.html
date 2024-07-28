@@ -88,7 +88,6 @@
         class="input__search"
         placeholder="Enter lobby code"
         id="lobbyCode"
-        value="default"
       />
     </div>
   </div>
@@ -174,7 +173,7 @@
       document.getElementById('loading').style.display = 'block';
       document.getElementById('loader').style.height = '100%';
 
-      if (nickname && lobbyCode) {
+      if (nickname) {
         ws.send(JSON.stringify({ type: 'join', nickname: nickname, lobbyCode: lobbyCode }));
       } else {
         console.log('Please enter both nickname and lobby code');
