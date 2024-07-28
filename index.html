@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MineSweeper VS</title>
+  <title>MineSweeper Fight</title>
   <link rel="stylesheet" href="Mine.Style.css" type="text/css" media="all"  />
   <script language="JavaScript" type="text/javascript" src="Mine.Code.js"></script>
   <style>
@@ -138,8 +138,8 @@
 
 
   <script>
-    const ws = new WebSocket('ws://localhost:8080');
-    // const ws = new WebSocket('wss://minesweeper-8k3i.onrender.com');
+    // const ws = new WebSocket('ws://localhost:8080);
+    const ws = new WebSocket('wss://minesweeper-8k3i.onrender.com');
     var alreadyStart = false;
     ws.onopen = () => {
       console.log('Connected to WebSocket server');
