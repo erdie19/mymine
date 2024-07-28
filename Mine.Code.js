@@ -519,6 +519,9 @@ function MineButton(mine_value,mine_index)
 	oMine.setAttribute("detected", false);
 
 	//oMine.innerText = mine_value;
+    oMine.addEventListener('touchstart', handleTouchStart, false);
+    oMine.addEventListener('touchend', handleTouchEnd, false);
+    oMine.addEventListener('touchcancel', handleTouchCancel, false);
 
 	//left mouse button response to onmouseup event, right mouse button response to onmousedown event
 	with(oMine)
@@ -675,12 +678,7 @@ function MineButton(mine_value,mine_index)
 				}
 			}
 
-			// Aggiungi gli event listener per gli eventi touch
-			document.querySelectorAll('.cell').forEach(function(cell) {
-				cell.addEventListener('touchstart', handleTouchStart, false);
-				cell.addEventListener('touchend', handleTouchEnd, false);
-				cell.addEventListener('touchcancel', handleTouchCancel, false);
-			});
+			
 			//middle mouse button, onmousedown only change the visual style of the blocks,
 			//in onmouseup the real action is taken.
 			if(event.button === 1)
