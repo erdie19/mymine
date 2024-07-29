@@ -37,7 +37,159 @@
   <!-- <input type="text" id="nickname" placeholder="Enter your nickname">
   <input type="text" id="lobbyCode" placeholder="Enter lobby code">
   <button id="lobbyRequest" onclick="joinLobby()">Join Lobby</button> -->
-  <div id="login">
+  
+  <div id="multi"></div>
+
+  <div class="page__container" id="lobbySingleRequest">
+    <button class="ui-btn"  onclick="startSingleGame()">
+        <span>
+          Singola 
+        </span>
+      </button>
+  </div>
+  <div class="page__container" id="lobbyMultiPlayerRequest" style="height: 15vh!important;">
+    <button class="ui-btn"  onclick="showLogin()">
+        <span>
+          Sfida qualcuno! 
+        </span>
+      </button>
+  </div>
+  </div>
+  <div class="page__container" id="loader">
+    <div aria-label="Orange and tan hamster running in a metal wheel" role="img" class="wheel-and-hamster" id="loading" style="display: none;">
+        <div class="wheel"></div>
+        <div class="hamster">
+            <div class="hamster__body">
+                <div class="hamster__head">
+                    <div class="hamster__ear"></div>
+                    <div class="hamster__eye"></div>
+                    <div class="hamster__nose"></div>
+                </div>
+                <div class="hamster__limb hamster__limb--fr"></div>
+                <div class="hamster__limb hamster__limb--fl"></div>
+                <div class="hamster__limb hamster__limb--br"></div>
+                <div class="hamster__limb hamster__limb--bl"></div>
+                <div class="hamster__tail"></div>
+            </div>
+        </div>
+        <div class="spoke"></div>
+    </div>    
+  </div>
+  <div class="page__container" style="height: 2vh!important;text-align:center!important; display: none;" id="loadingph"><p>In attesa di un degno avversario...</p></div>
+
+
+
+  <div id="game"></div>
+  <div id="playground"></div>
+
+  <!-- Aggiungi una sezione per mostrare i messaggi -->
+  <div style="display: flex;justify-content: center;align-items: center;margin: 0;padding: 0;margin-top: 5px;">
+  <div id="messages" style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 0 10% 0 10%; max-height: 200px; overflow-y: auto; display:none;">
+    <h3>Logs:</h3>
+  </div>
+  </div>
+
+
+  <script>
+    // const ws = new WebSocket('ws://localhost:8080);
+    const ws = new WebSocket('wss://minesweeper-8k3i.onrender.com');
+    var alreadyStart = false;
+    ws.onopen = () => {
+      console.log('Connected to WebSocket server');
+    };
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+
+      if (message.type === 'start') {
+        console.log('Lobby is full. Starting the game...');
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('loadingph').style.display = 'none';
+        document.getElementById('loader').style.height = '1vh';
+        document.getElementById('loader').style.marginTop = '1%';
+        
+        if(!alreadyStart) {
+          // Avvia il gioco
+          alreadyStart = !alreadyStart;
+          startGame(8,8,10);
+        }
+        
+      } else if (message.type === 'joined') {
+        console.log(`Joined lobby ${message.lobbyCode} as ${message.nickname}`);
+      } else if (message.type === 'error') {
+        console.log(`Error: ${message.message}`);
+      } else if (message.type === 'update') {
+        console.log(`Update from opponent: ${message.message}`);
+        // Gestisci aggiornamenti dal tuo avversario
+        updateGame(message.message);
+      }
+    };
+
+    ws.onclose = () => {
+      console.log('Disconnected from WebSocket server');
+    };
+
+    function joinLobby() {
+      const nickname = document.getElementById('nickname').value;
+      const lobbyCode = document.getElementById('lobbyCode').value;
+
+      document.getElementById('login').style.display = 'none';
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('loadingph').style.display = 'block';
+      document.getElementById('loader').style.marginTop = '20%';
+
+      if (nickname && lobbyCode) {
+        ws.send(JSON.stringify({ type: 'join', nicknametemp: nickname, lobbyCodetemp: lobbyCode }));
+      } else {
+        alert('Inserisci nickname e lobby code per proseguire');
+        document.getElementById('login').style.display = 'block';
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('loadingph').style.display = 'none';
+        document.getElementById('loader').style.marginTop = '20%';
+      }
+    }
+
+    function startSingleGame() {
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('loadingph').style.display = 'block';
+      document.getElementById('loader').style.marginTop = '20%';
+      document.getElementById('lobbySingleRequest').remove();
+      document.getElementById('lobbyMultiPlayerRequest').remove();
+      
+      
+      ws.send(JSON.stringify({ type: 'join', nicknametemp: "", lobbyCodetemp: "" }));
+    }
+
+    function startGame(row, col, num) {
+        // const urlStr = `Mine.View.html?row=${row}&col=${col}&mine=${num}`;
+        // ws.send(JSON.stringify({ type: 'startGame', row, col, num }));
+        // location.href = urlStr;
+        try {
+          const nickname = document.getElementById('nickname').value;
+        } catch (error) {
+          // Blocco di codice da eseguire se si verifica un errore
+          console.error(error); // Puoi gestire l'errore qui
+          const nickname = "";
+        } 
+
+        
+        var the_row = row,the_col = col,the_mine = num;
+        document.getElementById('messages').style.display = 'block';
+        startMinesweeper(the_row,the_col,the_mine, nickname);
+        
+        function closeWindow()
+        {
+            window.open('', '_self', ''); //bug fix for Chrome
+            window.close();
+        }
+
+    }
+
+    function showLogin(){
+      document.getElementById('lobbySingleRequest').remove();
+      document.getElementById('lobbyMultiPlayerRequest').remove();
+      document.getElementById('multi').innerHTML = `
+      <div id="login">
   <div class="page__container">
     <div class="input__container">
       <div class="shadow__input"></div>
@@ -91,7 +243,6 @@
       />
     </div>
   </div>
-  <div class="page__container" style="height: 2vh!important;text-align:center!important"><p>* Per una partita in solitaria lasciare vuoto il campo lobbycode.</p></div>
 
   <div class="page__container">
     <button class="ui-btn" id="lobbyRequest" onclick="joinLobby()">
@@ -101,113 +252,7 @@
       </button>
   </div>
   </div>
-  
-  <div class="page__container" id="loader">
-    <div aria-label="Orange and tan hamster running in a metal wheel" role="img" class="wheel-and-hamster" id="loading" style="display: none;">
-        <div class="wheel"></div>
-        <div class="hamster">
-            <div class="hamster__body">
-                <div class="hamster__head">
-                    <div class="hamster__ear"></div>
-                    <div class="hamster__eye"></div>
-                    <div class="hamster__nose"></div>
-                </div>
-                <div class="hamster__limb hamster__limb--fr"></div>
-                <div class="hamster__limb hamster__limb--fl"></div>
-                <div class="hamster__limb hamster__limb--br"></div>
-                <div class="hamster__limb hamster__limb--bl"></div>
-                <div class="hamster__tail"></div>
-            </div>
-        </div>
-        <div class="spoke"></div>
-    </div>    
-  </div>
-  <div class="page__container" style="height: 2vh!important;text-align:center!important; display: none;" id="loadingph"><p>In attesa di un degno avversario...</p></div>
-
-
-
-  <div id="game"></div>
-  <div id="playground"></div>
-
-  <!-- Aggiungi una sezione per mostrare i messaggi -->
-  <div style="display: flex;justify-content: center;align-items: center;margin: 0;padding: 0;margin-top: 5px;">
-  <div id="messages" style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 0 10% 0 10%; max-height: 200px; overflow-y: auto; display:none;">
-    <h3>Logs:</h3>
-  </div>
-  </div>
-
-
-  <script>
-    // const ws = new WebSocket('ws://localhost:8080);
-    const ws = new WebSocket('wss://minesweeper-8k3i.onrender.com');
-    var alreadyStart = false;
-    ws.onopen = () => {
-      console.log('Connected to WebSocket server');
-    };
-
-    ws.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-
-      if (message.type === 'start') {
-        console.log('Lobby is full. Starting the game...');
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('loadingph').style.display = 'none';
-        document.getElementById('loader').style.height = '1vh';
-        document.getElementById('loader').style.marginTop = '1%';
-
-        if(!alreadyStart) {
-          // Avvia il gioco
-          alreadyStart = !alreadyStart;
-          startGame(8,8,10);
-        }
-        
-      } else if (message.type === 'joined') {
-        console.log(`Joined lobby ${message.lobbyCode} as ${message.nickname}`);
-      } else if (message.type === 'error') {
-        console.log(`Error: ${message.message}`);
-      } else if (message.type === 'update') {
-        console.log(`Update from opponent: ${message.message}`);
-        // Gestisci aggiornamenti dal tuo avversario
-        updateGame(message.message);
-      }
-    };
-
-    ws.onclose = () => {
-      console.log('Disconnected from WebSocket server');
-    };
-
-    function joinLobby() {
-      const nickname = document.getElementById('nickname').value;
-      const lobbyCode = document.getElementById('lobbyCode').value;
-
-      document.getElementById('login').style.display = 'none';
-      document.getElementById('loading').style.display = 'block';
-      document.getElementById('loadingph').style.display = 'block';
-      document.getElementById('loader').style.marginTop = '20%';
-
-      if (nickname || (!nickname && !lobbyCode)) {
-        ws.send(JSON.stringify({ type: 'join', nicknametemp: nickname, lobbyCodetemp: lobbyCode }));
-      } else {
-        console.log('Please enter both nickname and lobby code');
-      }
-    }
-
-    function startGame(row, col, num) {
-        // const urlStr = `Mine.View.html?row=${row}&col=${col}&mine=${num}`;
-        // ws.send(JSON.stringify({ type: 'startGame', row, col, num }));
-        // location.href = urlStr;
-        const nickname = document.getElementById('nickname').value;
-        
-        var the_row = row,the_col = col,the_mine = num;
-        document.getElementById('messages').style.display = 'block';
-        startMinesweeper(the_row,the_col,the_mine, nickname);
-        
-        function closeWindow()
-        {
-            window.open('', '_self', ''); //bug fix for Chrome
-            window.close();
-        }
-
+    `;
     }
 
 
