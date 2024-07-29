@@ -111,7 +111,7 @@
         if(!alreadyStart) {
           // Avvia il gioco
           alreadyStart = !alreadyStart;
-          startGame(8,8,10,message.single);
+          startGame(8,8,10);
         }
         
       } else if (message.type === 'joined') {
@@ -139,7 +139,7 @@
       document.getElementById('loader').style.marginTop = '20%';
 
       if (nickname && lobbyCode) {
-        ws.send(JSON.stringify({ type: 'join', nicknametemp: nickname, lobbyCodetemp: lobbyCode, single: false}));
+        ws.send(JSON.stringify({ type: 'join', nicknametemp: nickname, lobbyCodetemp: lobbyCode}));
       } else {
         alert('Inserisci nickname e lobby code per proseguire');
         document.getElementById('login').style.display = 'block';
@@ -157,19 +157,41 @@
       document.getElementById('lobbyMultiPlayerRequest').remove();
       
       
-      ws.send(JSON.stringify({ type: 'join', nicknametemp: "", lobbyCodetemp: "", single:true }));
+      ws.send(JSON.stringify({ type: 'join', nicknametemp: "", lobbyCodetemp: "" }));
     }
 
-    function startGame(row, col, num, single) {
-        // const urlStr = `Mine.View.html?row=${row}&col=${col}&mine=${num}`;
-        // ws.send(JSON.stringify({ type: 'startGame', row, col, num }));
-        // location.href = urlStr;
-        if(!single) {
-          const nickname = document.getElementById('nickname').value;
-        }
-        else {
-          const nickname = "";
-        }
+    function startGame(row, col, num) {
+      document.getElementById('multi').innerHTML = `
+  <div class="page__container" style="display:none;">
+    <div class="input__container">
+      <div class="shadow__input"></div>
+      <button class="input__button__shadow">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="#000000"
+          width="20px"
+          height="20px"
+        >
+          <path d="M0 0h24v24H0z" fill="none"></path>
+          <path
+            d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+          ></path>
+        </svg>
+      </button>
+      <input
+        type="text"
+        name="username"
+        class="input__search"
+        placeholder="Enter username"
+        id="nickname"
+      />
+    </div>
+  </div>
+    `;
+        const nickname = document.getElementById('nickname').value;
+        
+        document.getElementById('multi').innerHTML = ``;
         
         
         var the_row = row,the_col = col,the_mine = num;
