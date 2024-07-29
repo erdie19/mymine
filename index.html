@@ -111,7 +111,7 @@
         if(!alreadyStart) {
           // Avvia il gioco
           alreadyStart = !alreadyStart;
-          startGame(8,8,10);
+          startGame(8,8,10,message.single);
         }
         
       } else if (message.type === 'joined') {
@@ -139,7 +139,7 @@
       document.getElementById('loader').style.marginTop = '20%';
 
       if (nickname && lobbyCode) {
-        ws.send(JSON.stringify({ type: 'join', nicknametemp: nickname, lobbyCodetemp: lobbyCode }));
+        ws.send(JSON.stringify({ type: 'join', nicknametemp: nickname, lobbyCodetemp: lobbyCode, single: false}));
       } else {
         alert('Inserisci nickname e lobby code per proseguire');
         document.getElementById('login').style.display = 'block';
@@ -157,21 +157,20 @@
       document.getElementById('lobbyMultiPlayerRequest').remove();
       
       
-      ws.send(JSON.stringify({ type: 'join', nicknametemp: "", lobbyCodetemp: "" }));
+      ws.send(JSON.stringify({ type: 'join', nicknametemp: "", lobbyCodetemp: "", single:true }));
     }
 
-    function startGame(row, col, num) {
+    function startGame(row, col, num, single) {
         // const urlStr = `Mine.View.html?row=${row}&col=${col}&mine=${num}`;
         // ws.send(JSON.stringify({ type: 'startGame', row, col, num }));
         // location.href = urlStr;
-        try {
+        if(!single) {
           const nickname = document.getElementById('nickname').value;
-        } catch (error) {
-          // Blocco di codice da eseguire se si verifica un errore
-          console.error(error); // Puoi gestire l'errore qui
+        }
+        else {
           const nickname = "";
-        } 
-
+        }
+        
         
         var the_row = row,the_col = col,the_mine = num;
         document.getElementById('messages').style.display = 'block';
