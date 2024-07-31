@@ -350,7 +350,7 @@ function showPopup() {
             setTimeout(function() {
                 popup.style.display = 'none';
                 overlay.style.display = 'none';
-            }, 2000); // Hide popup after 2 seconds
+            }, 4000); // Hide popup after 4 seconds
         }
 //Game over
 function GameOver(result)
