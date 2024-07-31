@@ -341,16 +341,19 @@ function ExpandAll()
 	}
 }
 
-function showPopup() {
+function showPopup(mex) {
             var popup = document.getElementById('popup');
             var overlay = document.getElementById('overlay');
+	    var popupText = document.getElementById('popuptext');
+    
+            popupText.innerHTML = mex;
             popup.style.display = 'block';
             overlay.style.display = 'block';
 
             setTimeout(function() {
                 popup.style.display = 'none';
                 overlay.style.display = 'none';
-            }, 4000); // Hide popup after 4 seconds
+            }, 5000); // Hide popup after 5 seconds
         }
 //Game over
 function GameOver(result)
@@ -364,7 +367,7 @@ function GameOver(result)
             audio.play();
 			alert("Awesome! You have cleared " + mine_count + " mines in only " + oRightBox.innerText + " seconds!");
 			result = nickname + " ha ripulito " + mine_count + " mine in solo " + oRightBox.innerText + " secondi! Go to the next level!"	
-			showPopup();
+			showPopup('Clicca sulla faccina sorridente per passare al turno successivo!');
 			row_count = row_count * 2;
 			col_count = col_count * 2;
 			if (row_count > 30) {
@@ -385,6 +388,7 @@ function GameOver(result)
 			ExpandAll();
 			oImgFace.src = "images/blast.gif";
 			alert("You lose, please try again!");
+			showPopup('Clicca sulla faccina che piange per ripetere il livello!');
 			result = nickname + " ha perso. Ripete il livello con " + mine_count + " mine."
 			window.clearInterval(timer_id)
 			ws.send(JSON.stringify({ type: 'update', message: result }));
