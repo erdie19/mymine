@@ -353,7 +353,7 @@ function showPopup(mex) {
             setTimeout(function() {
                 popup.style.display = 'none';
                 overlay.style.display = 'none';
-            }, 5000); // Hide popup after 5 seconds
+            }, 4000); // Hide popup after 5 seconds
         }
 //Game over
 function GameOver(result)
