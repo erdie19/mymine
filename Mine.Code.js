@@ -341,6 +341,17 @@ function ExpandAll()
 	}
 }
 
+function showPopup() {
+            var popup = document.getElementById('popup');
+            var overlay = document.getElementById('overlay');
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+
+            setTimeout(function() {
+                popup.style.display = 'none';
+                overlay.style.display = 'none';
+            }, 2000); // Hide popup after 2 seconds
+        }
 //Game over
 function GameOver(result)
 {
@@ -353,6 +364,7 @@ function GameOver(result)
             audio.play();
 			alert("Awesome! You have cleared " + mine_count + " mines in only " + oRightBox.innerText + " seconds!");
 			result = nickname + " ha ripulito " + mine_count + " mine in solo " + oRightBox.innerText + " secondi! Go to the next level!"	
+			showPopup();
 			row_count = row_count * 2;
 			col_count = col_count * 2;
 			if (row_count > 30) {
